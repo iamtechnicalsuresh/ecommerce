@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Shop Products{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-10">
+    <!-- Hero Section -->
+    <section x-data="carousel()" x-init="start()" class="relative h-[500px] overflow-hidden mb-10">
+        <!-- Slides -->
+        <template x-for="(slide, index) in slides" :key="index">
+            <div
+                class="absolute inset-0 transition-opacity duration-1000 ease-in-out cover"
+                :style="`background-image: url(${slide.image})`"
+                :class="{ 'opacity-100 z-10': index === currentIndex, 'opacity-0 z-0': index !== currentIndex }"
+                class="bg-cover bg-center"
+            >
+                <!-- Overlay -->
+                {% comment %} <div class="absolute inset-0 bg-black bg-opacity-50"></div> {% endcomment %}
+
+                <!-- Content -->
+                <div class="relative z-10 h-full flex items-center justify-start px-10 max-w-3xl">
+                    <div class="text-white space-y-4">
+                        <h2 class="text-3xl md:text-4xl font-bold" x-text="slide.title"></h2>
+                        <p class="text-lg text-gray-200" x-text="slide.subtitle"></p>
+                        <a :href="slide.link" class="inline-block bg-white text-black px-6 py-3 text-sm font-semibold uppercase tracking-wider rounded hover:bg-gray-200 transition">
+                            Shop Collection →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Controls -->
+        <div class="absolute left-4 top-1/2 -translate-y-1/2 z-20">
+            <button @click="prev()" class="bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full">
+                ❮
+            </button>
+        </div>
+        <div class="absolute right-4 top-1/2 -translate-y-1/2 z-20">
+            <button @click="next()" class="bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full">
+                ❯
+            </button>
+        </div>
+    </section>
+
+    <!-- Product Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for product in products %}
+        <div class="border rounded-lg shadow hover:shadow-lg transition p-4 relative">
+            {% if product.images.first %}
+                <img src="{{ product.images.first.image.url }}" alt="{{ product.title }}" class="w-full h-52 object-cover rounded">
+            {% else %}
+                <div class="w-full h-52 bg-gray-200 flex items-center justify-center rounded text-gray-400">No Image</div>
+            {% endif %}
+
+            <!-- Labels like HOT / NEW (optional) -->
+            {% if product.created_at|timesince < "7 days" %}
+                <span class="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">NEW</span>
+            {% endif %}
+
+            <h3 class="mt-4 font-semibold text-lg truncate">{{ product.title }}</h3>
+            <p class="text-sm text-gray-500">{{ product.category.name }}</p>
+
+            {% if product.discount_price %}
+                <div class="mt-2">
+                    <span class="text-lg font-bold text-green-600">${{ product.discount_price }}</span>
+                    <span class="text-sm line-through text-gray-400 ml-2">${{ product.price }}</span>
+                </div>
+            {% else %}
+                <div class="mt-2 text-lg font-bold text-gray-800">${{ product.price }}</div>
+            {% endif %}
+
+            <a href="{% url 'product-detail' product.slug %}" class="mt-4 block bg-blue-600 text-white text-center py-2 rounded hover:bg-blue-700">
+                View Product
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function carousel() {
+        return {
+            currentIndex: 0,
+            slides: [
+                {
+                    image: "{% static 'img/banner1.jpg' %}",
+                    title: "Winter/Spring Clothing 2020 Collections",
+                    subtitle: "Cursus elit, iaculis platea integer nisl sapien egestas.",
+                    link: "#"
+                },
+                {
+                    image: "{% static 'img/banner1.jpg' %}",
+                    title: "New Printer Arrivals",
+                    subtitle: "Top brands. Quality prints. Affordable prices.",
+                    link: "#"
+                },
+                {
+                    image: "{% static 'img/banner1.jpg' %}",
+                    title: "Upgrade Your Workspace",
+                    subtitle: "Modern accessories and gadgets for productivity.",
+                    link: "#"
+                }
+            ],
+            start() {
+                setInterval(() => {
+                    this.next();
+                }, 5000); // Change every 5 seconds
+            },
+            next() {
+                this.currentIndex = (this.currentIndex + 1) % this.slides.length;
+            },
+            prev() {
+                this.currentIndex = (this.currentIndex - 1 + this.slides.length) % this.slides.length;
+            }
+        };
+    }
+    </script>
+{% endblock %}
